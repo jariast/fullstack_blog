@@ -1,5 +1,5 @@
-const info = (msg) => console.log(msg);
-const error = (errorMsg) => console.error(errorMsg);
+const info = (...params) => console.log(...params);
+const error = (...params) => console.error(...params);
 
 module.exports = {
   info,
