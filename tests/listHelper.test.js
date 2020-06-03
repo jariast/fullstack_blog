@@ -205,7 +205,6 @@ describe('mostBlogs', () => {
 
   test('of a list with many blogs should return the author with most blog entries', () => {
     const result = listHelper.mostBlogs(listWithManyBlogs);
-    console.log('Most blogs: ', result);
     expect(result).toEqual({
       author: 'Ana',
       blogs: 4,
