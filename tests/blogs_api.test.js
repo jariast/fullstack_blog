@@ -99,6 +99,26 @@ describe('When saving a new blog', () => {
     const likes = blogsAfterInsertion.map((b) => b.likes);
     expect(likes).toContain(2);
   });
+
+  test('If saving a blog without "likes" property, it should default to 0', async () => {
+    const newBlog = {
+      title: 'BlogTest',
+      author: 'Test Author',
+      url: 'testurl.com',
+    };
+
+    const response = await api.post('/api/blogs').send(newBlog);
+    expect(response.body.likes).toBe(0);
+  });
+
+  test('If saving a blog without "title" and "url" properties, it should fail with 400 status', async () => {
+    const newBlog = {
+      author: 'Test Author',
+      likes: '45',
+    };
+
+    await api.post('/api/blogs').send(newBlog).expect(400);
+  });
 });
 
 afterAll(() => {
