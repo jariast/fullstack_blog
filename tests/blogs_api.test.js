@@ -134,6 +134,41 @@ describe('When Deleting a blog', () => {
   });
 });
 
+describe('When updating a blog', () => {
+  test('If ID is valid, the blog should update its likes', async () => {
+    const blogsBeforeUpdate = await helper.blogsInDB();
+    const blogToBeUpdated = blogsBeforeUpdate[1];
+    blogToBeUpdated.likes = blogToBeUpdated.likes + 10;
+
+    const response = await api
+      .put(`/api/blogs/${blogToBeUpdated.id}`)
+      .send(blogToBeUpdated)
+      .expect(200);
+
+    const blogsAfterUpdate = await helper.blogsInDB();
+    expect(blogsAfterUpdate).toHaveLength(blogsBeforeUpdate.length);
+
+    const updatedBlog = blogsAfterUpdate[1];
+    expect(response.body).toEqual(updatedBlog);
+
+    expect(updatedBlog.likes).toBe(blogToBeUpdated.likes);
+  });
+
+  test('That has a valid ID but no longer exists, it fails with status 404', async () => {
+    const validID = await helper.nonExistingId();
+    const blogToBeUpdated = helper.initialBlogs[0];
+
+    await api.put(`/api/blogs/${validID}`).send(blogToBeUpdated).expect(404);
+  });
+
+  test('That has an Invalid ID, it fails with status 400', async () => {
+    const invalidId = '5a3d5da59070081a82a3445';
+    const blogToBeUpdated = helper.initialBlogs[0];
+
+    await api.put(`/api/blogs/${invalidId}`).send(blogToBeUpdated).expect(400);
+  });
+});
+
 afterAll(() => {
   mongoose.connection.close();
 });

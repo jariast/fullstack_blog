@@ -16,7 +16,7 @@ const initialBlogs = [
 ];
 
 const nonExistingId = async () => {
-  const blog = new Blog({ title: 'BlogToBeRemoved' }); //This might change if we add more validations
+  const blog = new Blog({ title: 'BlogToBeRemoved', url: 'anyurl.com' }); //This might change if we add more validations
   await blog.save();
   await blog.remove();
 

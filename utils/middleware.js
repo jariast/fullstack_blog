@@ -17,20 +17,12 @@ const errorHandler = (error, request, response, next) => {
     return response.status(400).send({ error: 'Wrongly formatted ID' });
   }
 
-  if (error.name === 'NameMissing') {
-    return response.status(400).send({ error: 'Name is missing, fix it!' });
-  }
-
-  if (error.name === 'NumberMissing') {
-    return response.status(400).send({ error: 'Number is missing, fix it!' });
-  }
-
   if (error.name === 'ValidationError') {
     return response.status(400).send({ error: error.message });
   }
 
-  if (error.name === 'NotFound') {
-    return response.status(404).send({ error: 'Person no longer exists' });
+  if (error.message === 'NotFound') {
+    return response.status(404).send({ error: error.message });
   }
 
   next(error);
