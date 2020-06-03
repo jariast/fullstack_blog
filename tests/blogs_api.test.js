@@ -119,6 +119,21 @@ describe('When saving a new blog', () => {
   });
 });
 
+describe('When Deleting a blog', () => {
+  test('If ID is valid, the blog should be deleted and the status should be 204', async () => {
+    const blogsBeforeDeletion = await helper.blogsInDB();
+    const blogToBeDeleted = blogsBeforeDeletion[0];
+
+    await api.delete(`/api/blogs/${blogToBeDeleted.id}`).expect(204);
+
+    const blogsAfterDeletion = await helper.blogsInDB();
+    expect(blogsAfterDeletion).toHaveLength(blogsBeforeDeletion.length - 1);
+
+    const titles = blogsAfterDeletion.map((b) => b.title);
+    expect(titles).not.toContain(blogToBeDeleted.title);
+  });
+});
+
 afterAll(() => {
   mongoose.connection.close();
 });
