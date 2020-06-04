@@ -29,11 +29,21 @@ const errorHandler = (error, request, response, next) => {
     return response.status(401).send({ error: 'Invalid username or password' });
   }
 
+  if (error.message === 'TokenValidationError') {
+    return response.status(401).send({ error: 'Missing or invalid Token' });
+  }
+
+  if (error.name === 'JsonWebTokenError') {
+    return response.status(401).send({ error: error.message });
+  }
+
   if (error.message === 'NotFound') {
     return response.status(404).send({ error: error.message });
   }
 
-  console.log('Unhandled exception: ', error);
+  logger.error(
+    `Unhandled Error --- Name: ${error.name} --- Mgs: ${error.message}`
+  );
 
   next(error);
 };
