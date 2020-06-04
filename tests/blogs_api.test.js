@@ -85,16 +85,33 @@ describe('When saving a new blog', () => {
     await api.post('/api/blogs').send(newBlog);
     const blogsAfterInsertion = await helper.blogsInDB();
 
-    const titles = blogsAfterInsertion.map((b) => b.title);
+    const reducer = (propertiesValues, blog) => {
+      propertiesValues[0].push(blog.title);
+      propertiesValues[1].push(blog.author);
+      propertiesValues[2].push(blog.url);
+      propertiesValues[3].push(blog.likes);
+      return propertiesValues;
+    };
+
+    const [titles, authors, urls, likes] = blogsAfterInsertion.reduce(reducer, [
+      [],
+      [],
+      [],
+      [],
+    ]);
+
+    // I really dont know whats better here if using reduce or a map call for each property
+
+    // const titles = blogsAfterInsertion.map((b) => b.title);
     expect(titles).toContain('BlogTest');
 
-    const authors = blogsAfterInsertion.map((b) => b.author);
+    // const authors = blogsAfterInsertion.map((b) => b.author);
     expect(authors).toContain('Test Author');
 
-    const urls = blogsAfterInsertion.map((b) => b.url);
+    // const urls = blogsAfterInsertion.map((b) => b.url);
     expect(urls).toContain('testurl.com');
 
-    const likes = blogsAfterInsertion.map((b) => b.likes);
+    // const likes = blogsAfterInsertion.map((b) => b.likes);
     expect(likes).toContain(2);
   });
 
