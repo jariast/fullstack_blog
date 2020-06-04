@@ -25,6 +25,10 @@ const errorHandler = (error, request, response, next) => {
     return response.status(400).send({ error: 'Password Validation error' });
   }
 
+  if (error.message === 'LoginError') {
+    return response.status(401).send({ error: 'Invalid username or password' });
+  }
+
   if (error.message === 'NotFound') {
     return response.status(404).send({ error: error.message });
   }
