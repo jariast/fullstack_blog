@@ -3,7 +3,7 @@ Content-Type: application/json
 Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImNhbW9ubyIsImlkIjoiNWVkODI0MWZjZmI4ZWYzNTQ4ZmY4YTk0IiwiaWF0IjoxNTkxMzAwMDQxfQ.xD10-z0mJHmyDPbZdHsvXvMX4K8M2yJTym-Fxixb1M0
 
 {
-    "title": "Blog with token auth middleware",
+    "title": "Blog with token auth middleware 001",
     "author": "Camilo",
     "url": "google.com",
     "likes": 89
