@@ -1,13 +1,29 @@
 const mongoose = require('mongoose');
 const supertest = require('supertest');
+const jwt = require('jsonwebtoken');
+
 const Blog = require('../models/blog');
+const User = require('../models/user');
 const helper = require('./test_helper');
 const app = require('../app');
 
 const api = supertest(app);
+let firstUserToken = '';
+let secondUserToken = '';
+let firstUserId = '';
+
+beforeAll(async () => {
+  await helper.createDummyUsers();
+  const users = await helper.usersInDB();
+  firstUserId = users[0].id;
+  [firstUserToken, secondUserToken] = users.map((user) =>
+    jwt.sign({ username: user.username, id: user.id }, process.env.SECRET)
+  );
+});
 
 beforeEach(async () => {
   await Blog.deleteMany({});
+  await User.findByIdAndUpdate(firstUserId, { blogs: [] });
 
   const blogObjects = helper.initialBlogs.map((blog) => new Blog(blog));
   const promiseArray = blogObjects.map((blog) => blog.save());
@@ -54,7 +70,11 @@ describe('When saving a new blog', () => {
       likes: 2,
     };
 
-    await api.post('/api/blogs').send(newBlog);
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .set('Authorization', `bearer ${firstUserToken}`)
+      .expect(201);
     const blogsAfterInsertion = await helper.blogsInDB();
     expect(blogsAfterInsertion).toHaveLength(helper.initialBlogs.length + 1);
   });
@@ -70,6 +90,7 @@ describe('When saving a new blog', () => {
     await api
       .post('/api/blogs')
       .send(newBlog)
+      .set('Authorization', `bearer ${firstUserToken}`)
       .expect(201)
       .expect('Content-Type', /application\/json/);
   });
@@ -82,7 +103,10 @@ describe('When saving a new blog', () => {
       likes: 2,
     };
 
-    await api.post('/api/blogs').send(newBlog);
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .set('Authorization', `bearer ${firstUserToken}`);
     const blogsAfterInsertion = await helper.blogsInDB();
 
     const reducer = (propertiesValues, blog) => {
@@ -122,7 +146,10 @@ describe('When saving a new blog', () => {
       url: 'testurl.com',
     };
 
-    const response = await api.post('/api/blogs').send(newBlog);
+    const response = await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .set('Authorization', `bearer ${firstUserToken}`);
     expect(response.body.likes).toBe(0);
   });
 
@@ -132,7 +159,11 @@ describe('When saving a new blog', () => {
       likes: '45',
     };
 
-    await api.post('/api/blogs').send(newBlog).expect(400);
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .set('Authorization', `bearer ${firstUserToken}`)
+      .expect(400);
   });
 });
 
@@ -141,7 +172,10 @@ describe('When Deleting a blog', () => {
     const blogsBeforeDeletion = await helper.blogsInDB();
     const blogToBeDeleted = blogsBeforeDeletion[0];
 
-    await api.delete(`/api/blogs/${blogToBeDeleted.id}`).expect(204);
+    await api
+      .delete(`/api/blogs/${blogToBeDeleted.id}`)
+      .set('Authorization', `bearer ${firstUserToken}`)
+      .expect(204);
 
     const blogsAfterDeletion = await helper.blogsInDB();
     expect(blogsAfterDeletion).toHaveLength(blogsBeforeDeletion.length - 1);

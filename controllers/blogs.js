@@ -16,6 +16,7 @@ blogsRouter.post('/', async (request, response) => {
   const reqBody = request.body;
   const token = request.token;
   const decodedToken = jwt.verify(token, process.env.SECRET);
+
   if (!token || !decodedToken.id) {
     throw Error('TokenValidationError');
   }

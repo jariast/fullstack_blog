@@ -16,6 +16,11 @@ const initialBlogs = [
   },
 ];
 
+const initialUsers = [
+  { username: 'admin', name: 'root', passwordHash: '123' },
+  { username: 'regularJoe', name: 'Regular user', passwordHash: '567' },
+];
+
 const nonExistingId = async () => {
   const blog = new Blog({ title: 'BlogToBeRemoved', url: 'anyurl.com' }); //This might change if we add more validations
   await blog.save();
@@ -34,4 +39,18 @@ const usersInDB = async () => {
   return users.map((user) => user.toJSON());
 };
 
-module.exports = { initialBlogs, nonExistingId, blogsInDB, usersInDB };
+const createDummyUsers = async () => {
+  await User.deleteMany({});
+
+  const userObjects = initialUsers.map((user) => new User(user));
+  const promiseArray = userObjects.map((user) => user.save());
+  await Promise.all(promiseArray);
+};
+
+module.exports = {
+  initialBlogs,
+  nonExistingId,
+  blogsInDB,
+  usersInDB,
+  createDummyUsers,
+};
