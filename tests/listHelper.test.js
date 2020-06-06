@@ -211,3 +211,79 @@ describe('mostBlogs', () => {
     });
   });
 });
+
+describe('Most likes: ', () => {
+  const listWithManyBlogs = [
+    {
+      title: 'Blog01',
+      author: 'Camilo',
+      url: 'google.com',
+      likes: 91,
+      id: '5ed66c2e2a9d3633c4c17f9f',
+    },
+    {
+      title: 'Blog02',
+      author: 'Camilo',
+      url: 'google.com',
+      likes: 4,
+      id: '5ed67a047ef88a3908308c1b',
+    },
+    {
+      title: 'Blog03',
+      author: 'Romila',
+      url: 'google.com',
+      likes: 33,
+      id: '5ed687ca4cc7b3251837b61d',
+    },
+    {
+      title: 'Blog04',
+      author: 'Ana',
+      url: 'google.com',
+      likes: 11,
+      id: '5ed6ecab610e243214db11dc',
+    },
+    {
+      title: 'Blog05',
+      author: 'Romila',
+      url: 'google.com',
+      likes: 0,
+      id: '5ed6ecc9610e243214db11dd',
+    },
+    {
+      title: 'Blog06',
+      author: 'Romila',
+      url: 'google.com',
+      likes: 6,
+      id: '5ed6ecd5610e243214db11de',
+    },
+    {
+      title: 'Blog07',
+      author: 'Ana',
+      url: 'google.com',
+      likes: 41,
+      id: '5ed6eea522a1293a74eeb296',
+    },
+    {
+      title: 'Blog08',
+      author: 'Ana',
+      url: 'google.com',
+      likes: 9,
+      id: '5ed6eeab22a1293a74eeb297',
+    },
+    {
+      title: 'Blog09',
+      author: 'Ana',
+      url: 'google.com',
+      likes: 13,
+      id: '5ed6eef06eea0843e80662ba',
+    },
+  ];
+
+  test('of a list with many blogs should return the author with most likes', () => {
+    const result = listHelper.mostLikes(listWithManyBlogs);
+    expect(result).toEqual({
+      author: 'Camilo',
+      totalLikes: 95,
+    });
+  });
+});
