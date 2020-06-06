@@ -8,6 +8,14 @@ const requestLogger = (request, response, next) => {
   next();
 };
 
+const tokenExtractor = (request, response, next) => {
+  const authorization = request.get('authorization');
+  if (authorization && authorization.toLowerCase().startsWith('bearer')) {
+    request.token = authorization.substring(7);
+  }
+  next();
+};
+
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'Unknown Endpoint' });
 };
@@ -25,13 +33,32 @@ const errorHandler = (error, request, response, next) => {
     return response.status(400).send({ error: 'Password Validation error' });
   }
 
+  if (error.message === 'LoginError') {
+    return response.status(401).send({ error: 'Invalid username or password' });
+  }
+
+  if (error.message === 'TokenValidationError') {
+    return response.status(401).send({ error: 'Missing or invalid Token' });
+  }
+
+  if (error.name === 'JsonWebTokenError') {
+    return response.status(401).send({ error: error.message });
+  }
+
   if (error.message === 'NotFound') {
     return response.status(404).send({ error: error.message });
   }
 
-  console.log('Unhandled exception: ', error);
+  logger.error(
+    `Unhandled Error --- Name: ${error.name} --- Mgs: ${error.message}`
+  );
 
   next(error);
 };
 
-module.exports = { requestLogger, unknownEndpoint, errorHandler };
+module.exports = {
+  requestLogger,
+  unknownEndpoint,
+  errorHandler,
+  tokenExtractor,
+};

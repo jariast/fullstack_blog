@@ -1,17 +1,37 @@
 const mongoose = require('mongoose');
 const supertest = require('supertest');
+const jwt = require('jsonwebtoken');
+
 const Blog = require('../models/blog');
+const User = require('../models/user');
 const helper = require('./test_helper');
 const app = require('../app');
 
 const api = supertest(app);
+let firstUserToken = '';
+let secondUserToken = '';
+let firstUserId = '';
+
+beforeAll(async () => {
+  await helper.createDummyUsers();
+  const users = await helper.usersInDB();
+  firstUserId = users[0].id;
+  [firstUserToken, secondUserToken] = users.map((user) =>
+    jwt.sign({ username: user.username, id: user.id }, process.env.SECRET)
+  );
+});
 
 beforeEach(async () => {
   await Blog.deleteMany({});
 
-  const blogObjects = helper.initialBlogs.map((blog) => new Blog(blog));
+  const blogObjects = helper.initialBlogs.map((blog) => {
+    blog.user = firstUserId;
+    return new Blog(blog);
+  });
   const promiseArray = blogObjects.map((blog) => blog.save());
   await Promise.all(promiseArray);
+  const blogIds = [(await promiseArray[0])._id, (await promiseArray[0])._id];
+  await User.findByIdAndUpdate(firstUserId, { blogs: blogIds });
 });
 
 describe('When the DB has some blogs on it', () => {
@@ -54,7 +74,11 @@ describe('When saving a new blog', () => {
       likes: 2,
     };
 
-    await api.post('/api/blogs').send(newBlog);
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .set('Authorization', `bearer ${firstUserToken}`)
+      .expect(201);
     const blogsAfterInsertion = await helper.blogsInDB();
     expect(blogsAfterInsertion).toHaveLength(helper.initialBlogs.length + 1);
   });
@@ -70,6 +94,7 @@ describe('When saving a new blog', () => {
     await api
       .post('/api/blogs')
       .send(newBlog)
+      .set('Authorization', `bearer ${firstUserToken}`)
       .expect(201)
       .expect('Content-Type', /application\/json/);
   });
@@ -82,7 +107,10 @@ describe('When saving a new blog', () => {
       likes: 2,
     };
 
-    await api.post('/api/blogs').send(newBlog);
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .set('Authorization', `bearer ${firstUserToken}`);
     const blogsAfterInsertion = await helper.blogsInDB();
 
     const reducer = (propertiesValues, blog) => {
@@ -122,7 +150,10 @@ describe('When saving a new blog', () => {
       url: 'testurl.com',
     };
 
-    const response = await api.post('/api/blogs').send(newBlog);
+    const response = await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .set('Authorization', `bearer ${firstUserToken}`);
     expect(response.body.likes).toBe(0);
   });
 
@@ -132,7 +163,22 @@ describe('When saving a new blog', () => {
       likes: '45',
     };
 
-    await api.post('/api/blogs').send(newBlog).expect(400);
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .set('Authorization', `bearer ${firstUserToken}`)
+      .expect(400);
+  });
+
+  test('If the request is missing the token, it should fail with a 401 status', async () => {
+    const newBlog = {
+      title: 'BlogTest',
+      author: 'Test Author',
+      url: 'testurl.com',
+      likes: 2,
+    };
+
+    await api.post('/api/blogs').send(newBlog).expect(401);
   });
 });
 
@@ -141,13 +187,33 @@ describe('When Deleting a blog', () => {
     const blogsBeforeDeletion = await helper.blogsInDB();
     const blogToBeDeleted = blogsBeforeDeletion[0];
 
-    await api.delete(`/api/blogs/${blogToBeDeleted.id}`).expect(204);
+    await api
+      .delete(`/api/blogs/${blogToBeDeleted.id}`)
+      .set('Authorization', `bearer ${firstUserToken}`)
+      .expect(204);
 
     const blogsAfterDeletion = await helper.blogsInDB();
     expect(blogsAfterDeletion).toHaveLength(blogsBeforeDeletion.length - 1);
 
     const titles = blogsAfterDeletion.map((b) => b.title);
     expect(titles).not.toContain(blogToBeDeleted.title);
+  });
+
+  test('If the request is missing the token, it should fail with a 401 status', async () => {
+    const blogsBeforeDeletion = await helper.blogsInDB();
+    const blogToBeDeleted = blogsBeforeDeletion[0];
+
+    await api.delete(`/api/blogs/${blogToBeDeleted.id}`).expect(401);
+  });
+
+  test('If logged user is not the owner of the blog, it should fail with a 401 status', async () => {
+    const blogsBeforeDeletion = await helper.blogsInDB();
+    const blogToBeDeleted = blogsBeforeDeletion[0];
+
+    await api
+      .delete(`/api/blogs/${blogToBeDeleted.id}`)
+      .set('Authorization', `bearer ${secondUserToken}`)
+      .expect(401);
   });
 });
 
@@ -157,7 +223,7 @@ describe('When updating a blog', () => {
     const blogToBeUpdated = blogsBeforeUpdate[1];
     blogToBeUpdated.likes = blogToBeUpdated.likes + 10;
 
-    const response = await api
+    await api
       .put(`/api/blogs/${blogToBeUpdated.id}`)
       .send(blogToBeUpdated)
       .expect(200);
@@ -166,7 +232,6 @@ describe('When updating a blog', () => {
     expect(blogsAfterUpdate).toHaveLength(blogsBeforeUpdate.length);
 
     const updatedBlog = blogsAfterUpdate[1];
-    expect(response.body).toEqual(updatedBlog);
 
     expect(updatedBlog.likes).toBe(blogToBeUpdated.likes);
   });
