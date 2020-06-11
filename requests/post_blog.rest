@@ -1,10 +1,10 @@
-POST http://localhost:3003/api/blogs
+POST http://localhost:3001/api/blogs
 Content-Type: application/json
-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImNhbW9ubyIsImlkIjoiNWVkODI0MWZjZmI4ZWYzNTQ4ZmY4YTk0IiwiaWF0IjoxNTkxMzAwMDQxfQ.xD10-z0mJHmyDPbZdHsvXvMX4K8M2yJTym-Fxixb1M0
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InNwb29reUJvb2dpZSIsImlkIjoiNWVkZjdjZTdmMTRmMDI0MWU4OGQwNjJmIiwiaWF0IjoxNTkxNzA0ODU5fQ.lEos9YwVjrmotkHgPjV9PacWVjXFywQH7EQkx3si3sg
 
 {
-    "title": "Blog with token auth middleware 001",
-    "author": "Camilo",
+    "title": "Testing blog",
+    "author": "Martin",
     "url": "google.com",
-    "likes": 89
+    "likes": 6
 }
