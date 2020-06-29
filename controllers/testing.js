@@ -9,4 +9,31 @@ testingRouter.post('/reset', async (request, response) => {
   response.status(204).end();
 });
 
+testingRouter.post('/createBlogWithRandomUserId', async (request, response) => {
+  // const blog = new Blog({
+  //   title: 'Blog Without Valid User',
+  //   author: 'Random Author',
+  //   url: 'randomurl.com',
+  //   likes: 0,
+  //   user: 1,
+  // });
+
+  const reqBody = request.body;
+  const blog = new Blog({
+    title: reqBody.title,
+    author: reqBody.author,
+    url: reqBody.url,
+    likes: 0,
+    user: reqBody.userId,
+  });
+
+  const user = await User.findById(reqBody.userId);
+  console.log('User: ', user);
+
+  const savedBlog = await blog.save();
+  user.blogs = user.blogs.concat(savedBlog._id);
+  await user.save();
+  response.status(201).json(savedBlog.toJSON());
+});
+
 module.exports = testingRouter;
