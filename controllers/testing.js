@@ -10,14 +10,6 @@ testingRouter.post('/reset', async (request, response) => {
 });
 
 testingRouter.post('/createBlogWithRandomUserId', async (request, response) => {
-  // const blog = new Blog({
-  //   title: 'Blog Without Valid User',
-  //   author: 'Random Author',
-  //   url: 'randomurl.com',
-  //   likes: 0,
-  //   user: 1,
-  // });
-
   const reqBody = request.body;
   const blog = new Blog({
     title: reqBody.title,
