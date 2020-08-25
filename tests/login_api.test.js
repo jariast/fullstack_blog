@@ -33,7 +33,7 @@ describe('When an user tries to login:', () => {
     expect(resBody.token).toBeDefined();
   });
 
-  test('If username is invalid it should fail with a 201 status', async () => {
+  test('If username is invalid it should fail with a 401 status', async () => {
     const invalidCredentials = {
       username: 'nonExistentUsername',
       password: 'password',
@@ -41,7 +41,7 @@ describe('When an user tries to login:', () => {
     await api.post(apiUrl).send(invalidCredentials).expect(401);
   });
 
-  test('If password is invalid it should fail with a 201 status', async () => {
+  test('If password is invalid it should fail with a 401 status', async () => {
     const invalidCredentials = {
       username: 'admin',
       password: 'invalidPassword',
@@ -49,7 +49,7 @@ describe('When an user tries to login:', () => {
     await api.post(apiUrl).send(invalidCredentials).expect(401);
   });
 
-  test('If username property is missing it should fail with a 201 status', async () => {
+  test('If username property is missing it should fail with a 401 status', async () => {
     const invalidCredentials = {
       password: 'invalidPassword',
     };
